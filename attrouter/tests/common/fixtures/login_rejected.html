@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Login</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="main-content">
+        <div id="content">
+          <div class="resfail">
+            <strong>Access denied.</strong> The device access code you entered is incorrect.
+          </div>
+          <form method="post" action="/cgi-bin/login.ha">
+            <input type="hidden" name="nonce" value="{{NONCE}}" />
+            <table summary="Table for entering username and password as appropriate">
+              <tr>
+                <th scope="row" align="right"><label for="password">Device Access Code</label></th>
+                <td><input id="password" type="password" name="password" size="20" maxlength="32" value="" autocomplete="off" class="errlogin" /></td>
+              </tr>
+              <tr>
+                <th scope="row" align="right"></th>
+                <td><input id="hashpassword" type="hidden" name="hashpassword" size="100" maxlength="100" autocomplete="off" /></td>
+              </tr>
+            </table>
+            <input type="submit" name="Continue" class="cssbtn btnspacer" value="Continue" />
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

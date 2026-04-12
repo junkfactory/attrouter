@@ -1,0 +1,24 @@
+[package]
+name = "attrctl"
+version = "0.1.0"
+edition = "2024"
+description = "Command-line tool for AT&T residential gateway routers"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/erikh/attrouter"
+readme = "../README.md"
+keywords = ["att", "bgw320", "router", "gateway", "cli"]
+categories = ["command-line-utilities", "network-programming"]
+
+[[bin]]
+name = "attrctl"
+path = "src/main.rs"
+
+[dependencies]
+attrouter = { path = "../attrouter", version = "0.1.0" }
+clap = { version = "4", features = ["derive", "env"] }
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

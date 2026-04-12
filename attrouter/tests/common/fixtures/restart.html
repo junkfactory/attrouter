@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Restart Device</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="main-content">
+        <div id="content">
+          <h1>Restart Device</h1>
+          <p>Select a restart option.</p>
+          <form method="post" action="/cgi-bin/restart.ha">
+            <input type="hidden" name="nonce" value="{{NONCE}}" />
+            <table summary="Restart options">
+              <tr>
+                <th scope="row">Device Restart</th>
+                <td>
+                  <input type="submit" name="Restart" class="cssbtn" value="Restart" />
+                </td>
+              </tr>
+            </table>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
