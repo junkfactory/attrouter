@@ -54,6 +54,9 @@ struct Session {
 
 struct State_ {
     access_code: String,
+    /// When set, a cookie-less `GET /cgi-bin/login.ha` is answered with
+    /// the "cookies must be enabled" notice instead of the login form.
+    cookie_notice_first: bool,
     sessions: HashMap<String, Session>,
     devices: Vec<SimDevice>,
     reboots_requested: u32,
@@ -66,6 +69,7 @@ impl State_ {
     fn new() -> Self {
         Self {
             access_code: "letmein".into(),
+            cookie_notice_first: false,
             sessions: HashMap::new(),
             devices: default_devices(),
             reboots_requested: 0,
@@ -165,6 +169,10 @@ impl FakeGateway {
 
     pub fn set_access_code(&self, code: &str) {
         self.state.0.lock().unwrap().access_code = code.into();
+    }
+
+    pub fn set_cookie_notice(&self, on: bool) {
+        self.state.0.lock().unwrap().cookie_notice_first = on;
     }
 
     pub fn set_devices(&self, devices: Vec<SimDevice>) {
@@ -397,6 +405,9 @@ fn render_devices_page(state: &SharedState, nonce: &str) -> String {
 
 async fn handle_login_get(State(state): State<SharedState>, headers: HeaderMap) -> Response {
     let (sid, new) = ensure_session(&state, &headers);
+    if state.0.lock().unwrap().cookie_notice_first && !headers.contains_key(header::COOKIE) {
+        return html_response(fixtures::LOGIN_NOTICE.to_string(), &sid, new);
+    }
     let nonce = issue_nonce(&state, &sid);
     html_response(fixtures::render(fixtures::LOGIN, &nonce), &sid, new)
 }

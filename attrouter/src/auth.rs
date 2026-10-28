@@ -4,6 +4,9 @@
 //! client must:
 //!
 //! 1. `GET /cgi-bin/login.ha` to receive a `SessionID` cookie and a nonce.
+//!    The first, cookie-less GET may only return a "cookies must be
+//!    enabled" notice; the GET needs repeating once the gateway has stored
+//!    the session cookie, and only then does the page carry the nonce.
 //! 2. Compute `hashpassword = md5(access_code + nonce)` as lowercase hex.
 //! 3. `POST /cgi-bin/login.ha` with:
 //!    - `nonce` (echoed back)
@@ -34,9 +37,22 @@ impl Client {
     /// On success the session cookie is stored in the client's cookie jar
     /// and subsequent requests will be authenticated.
     pub async fn login(&self, access_code: &str) -> Result<()> {
-        let page = self.get(LOGIN_PATH).await?;
-        let html = Html::parse_document(&page);
-        let nonce = parse::find_nonce(&html, LOGIN_PATH)?;
+        let mut nonce = None;
+        // Some firmware (BGW320-500 6.35.8) answers the first cookie-less
+        // GET with a "cookies must be enabled in your browser" notice and a
+        // `Set-Cookie: SessionID` header. The login form only appears once
+        // that cookie is sent back, so fetch until a nonce shows up.
+        for _ in 0..3 {
+            let page = self.get(LOGIN_PATH).await?;
+            let html = Html::parse_document(&page);
+            if let Ok(found) = parse::find_nonce(&html, LOGIN_PATH) {
+                nonce = Some(found);
+                break;
+            }
+        }
+        let nonce = nonce.ok_or_else(|| Error::MissingNonce {
+            page: LOGIN_PATH.to_string(),
+        })?;
 
         let mut hasher = Md5::new();
         hasher.update(access_code.as_bytes());

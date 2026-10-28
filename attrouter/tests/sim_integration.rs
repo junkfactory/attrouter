@@ -76,6 +76,21 @@ async fn login_with_correct_code_succeeds() {
 }
 
 #[tokio::test]
+async fn login_succeeds_after_cookie_notice() {
+    let sim = FakeGateway::spawn().await;
+    sim.set_cookie_notice(true);
+    sim.set_access_code("letmein");
+    let client = client_for(&sim.base_url());
+    client
+        .login("letmein")
+        .await
+        .expect("login ok after cookie notice");
+    let list = client.devices().await.expect("devices");
+    assert!(!list.is_empty());
+    sim.shutdown().await;
+}
+
+#[tokio::test]
 async fn login_with_wrong_code_returns_auth_failed() {
     let sim = FakeGateway::spawn().await;
     sim.set_access_code("letmein");

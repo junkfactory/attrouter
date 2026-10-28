@@ -13,6 +13,7 @@ pub const DEVICES: &str = include_str!("../../src/testdata/devices.html");
 
 pub const HOME: &str = include_str!("fixtures/home.html");
 pub const LOGIN: &str = include_str!("fixtures/login.html");
+pub const LOGIN_NOTICE: &str = include_str!("fixtures/login_notice.html");
 pub const LOGIN_REJECTED: &str = include_str!("fixtures/login_rejected.html");
 pub const RESTART: &str = include_str!("fixtures/restart.html");
 pub const RESTART_ACCEPTED: &str = include_str!("fixtures/restart_accepted.html");
