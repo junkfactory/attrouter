@@ -18,6 +18,8 @@
 //! The device access code is printed on a label on the bottom / side of the
 //! gateway.
 
+use std::time::Duration;
+
 use md5::{Digest, Md5};
 use scraper::Html;
 
@@ -26,6 +28,13 @@ use crate::error::{Error, Result};
 use crate::parse;
 
 pub(crate) const LOGIN_PATH: &str = "/cgi-bin/login.ha";
+
+/// The login `POST` answers `302 Found` and the page it redirects to is the
+/// gateway's `Status` page when the credentials were accepted. Some firmware
+/// takes far longer than the client's default timeout to render that page
+/// (measured 16.9s on a BGW320-500 running 6.35.8), so give it room without
+/// loosening the timeout for every other request.
+const LOGIN_POST_TIMEOUT: Duration = Duration::from_secs(60);
 
 impl Client {
     /// Authenticate with the gateway's device access code.
@@ -69,7 +78,9 @@ impl Client {
             ("hashpassword", &hashpassword),
             ("Continue", "Continue"),
         ];
-        let body = self.post_form(LOGIN_PATH, &form).await?;
+        let body = self
+            .post_form_timeout(LOGIN_PATH, &form, Some(LOGIN_POST_TIMEOUT))
+            .await?;
         let body_html = Html::parse_document(&body);
 
         // If the gateway rejected the access code it renders the login page

@@ -98,15 +98,27 @@ impl Client {
     }
 
     pub(crate) async fn post_form(&self, path: &str, form: &[(&str, &str)]) -> Result<String> {
+        self.post_form_timeout(path, form, None).await
+    }
+
+    /// Like [`Client::post_form`], but with an optional per-request timeout
+    /// that overrides the client-wide default.
+    ///
+    /// `reqwest` applies a request timeout to the whole request, so the
+    /// redirects it follows and the response body read are covered too.
+    pub(crate) async fn post_form_timeout(
+        &self,
+        path: &str,
+        form: &[(&str, &str)],
+        timeout: Option<Duration>,
+    ) -> Result<String> {
         let url = self.url(path);
         tracing::debug!(%url, field_count = form.len(), "POST form");
-        let resp = self
-            .http
-            .post(&url)
-            .form(form)
-            .send()
-            .await?
-            .error_for_status()?;
+        let mut request = self.http.post(&url).form(form);
+        if let Some(timeout) = timeout {
+            request = request.timeout(timeout);
+        }
+        let resp = request.send().await?.error_for_status()?;
         let text = resp.text().await?;
         tracing::trace!(bytes = text.len(), "POST response");
         Ok(text)
